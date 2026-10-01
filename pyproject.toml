@@ -1,0 +1,97 @@
+[project]
+name = "medicard"
+version = "1.0.0"
+description = "MediCard — Health Cashless Hospitalization & Settlement Platform (BC-AINE-017)"
+requires-python = ">=3.12"
+readme = "README.md"
+dependencies = [
+    "fastapi (>=0.115,<1.0)",
+    "uvicorn (>=0.30,<1.0)",
+]
+
+[project.scripts]
+medicard = "src.main:run"
+
+[tool.poetry]
+packages = [{ include = "src" }]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0"
+pytest-cov = ">=5.0"          # coverage tool -> coverage.xml
+httpx = ">=0.27"               # FastAPI TestClient
+import-linter = ">=2.0"        # architecture layering contracts
+ruff = ">=0.6"
+mypy = ">=1.10"
+
+[tool.poetry.group.agents]
+optional = true
+
+[tool.poetry.group.agents.dependencies]
+claude-agent-sdk = ">=0.1"     # scripts/sdk_*.py
+
+[build-system]
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"
+
+# ---------------------------------------------------------------- tests / coverage
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "ac(id): acceptance criterion this test verifies, e.g. @pytest.mark.ac('AC-07')",
+    "nfr(id): non-functional requirement this test verifies",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 80
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+# ---------------------------------------------------------------- architecture (import-linter)
+[tool.importlinter]
+root_packages = ["src"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Layered architecture: api -> service -> repository -> config -> domain"
+type = "layers"
+layers = ["src.main", "src.api", "src.service", "src.repository", "src.config", "src.domain"]
+
+[[tool.importlinter.contracts]]
+name = "Domain is pure: no frameworks, no I/O"
+type = "forbidden"
+source_modules = ["src.domain"]
+forbidden_modules = ["fastapi", "starlette", "pydantic", "sqlite3", "uvicorn", "logging"]
+
+[[tool.importlinter.contracts]]
+name = "Services do not depend on the web framework"
+type = "forbidden"
+source_modules = ["src.service", "src.repository"]
+forbidden_modules = ["fastapi", "starlette", "uvicorn"]
+
+# ---------------------------------------------------------------- lint / types
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["frontend", "_backup_learnlab", "~"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "N"]
+ignore = ["S101", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106"]
+"scripts/**" = ["S603", "S607"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["src"]
+strict = true
+warn_unused_ignores = false

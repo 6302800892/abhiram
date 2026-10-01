@@ -1,0 +1,13 @@
+{
+  "name": "medicard-local",
+  "owner": {
+    "name": "MediCard"
+  },
+  "plugins": [
+    {
+      "name": "medicard-cashless-substrate",
+      "source": "./",
+      "description": "MediCard cashless-health AI-native substrate: domain agents (eligibility, pre-auth decider, settlement), technical agent"
+    }
+  ]
+}

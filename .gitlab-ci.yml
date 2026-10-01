@@ -1,0 +1,87 @@
+# MediCard CI — build, test, architecture, E2E, and Claude Code review on every merge request.
+# PR-Only Merge Rule: main is protected; changes arrive via merge requests merged with --no-ff.
+
+stages: [lint, test, e2e, review]
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+
+.python:
+  image: python:3.12-slim
+  cache:
+    key: poetry-$CI_COMMIT_REF_SLUG
+    paths: [.cache/pip, .venv]
+  before_script:
+    - pip install --quiet "poetry>=2.0"
+    - poetry install --no-interaction
+
+lint:
+  extends: .python
+  stage: lint
+  script:
+    - poetry run ruff check .
+    - poetry run lint-imports          # layering contracts (import-linter)
+    - poetry run mypy src
+    - apt-get update -qq && apt-get install -y -qq git >/dev/null
+    - bash scripts/test-hooks.sh       # project guardrail hooks behave as specified
+
+test:
+  extends: .python
+  stage: test
+  script:
+    - poetry run pytest --cov=src --cov-report=xml --cov-report=term --junitxml=report.xml
+    - poetry run python scripts/ac_trace.py      # every AC-NN has a tagged test
+  coverage: '/^TOTAL.*\s+(\d+(?:\.\d+)?)%/'
+  artifacts:
+    when: always
+    paths: [coverage.xml, specs/reviews/ac-trace.md]
+    reports:
+      junit: report.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+e2e:
+  stage: e2e
+  image: mcr.microsoft.com/playwright:v1.56.0-noble
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip python3-venv >/dev/null
+    - python3 -m venv /opt/poetry && /opt/poetry/bin/pip install --quiet "poetry>=2.0"
+    - /opt/poetry/bin/poetry install --no-interaction
+    - cd frontend && npm ci && npm run build && cd ..
+  script:
+    - cd frontend && POETRY=/opt/poetry/bin/poetry npx playwright test --grep-invert @visual
+  artifacts:
+    when: always
+    paths: [frontend/playwright-report/]
+
+# Claude Code in CI (GitLab equivalent of the Claude Code GitHub Action).
+# Needs masked CI variable ANTHROPIC_API_KEY. Runs the harness security-reviewer and MediCard
+# technical agents through the Claude Agent SDK (scripts/sdk_mr_review.py) and, when someone
+# comments "@claude" the job can be re-run with CLAUDE_PROMPT for an interactive task.
+claude-review:
+  stage: review
+  image: node:24-bookworm
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $ANTHROPIC_API_KEY
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip python3-venv git >/dev/null
+    - npm install -g @anthropic-ai/claude-code
+    - python3 -m venv .agents && .agents/bin/pip install --quiet claude-agent-sdk
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+  script:
+    - .agents/bin/python scripts/sdk_mr_review.py --base "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - |
+      if [ -n "$CLAUDE_PROMPT" ]; then
+        claude -p "$CLAUDE_PROMPT" --permission-mode acceptEdits \
+          --allowedTools "Read,Grep,Glob,Bash(poetry run pytest:*)" --output-format text
+      fi
+  artifacts:
+    when: always
+    paths: [specs/reviews/mr-review.md]

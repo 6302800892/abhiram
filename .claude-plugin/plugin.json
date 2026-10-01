@@ -1,0 +1,40 @@
+{
+  "name": "medicard-cashless-substrate",
+  "version": "1.0.0",
+  "description": "MediCard cashless-health AI-native substrate: domain agents (eligibility, pre-auth decider, settlement), technical agents (state-machine validator, arch-test author, audit tracer), domain skills, PHI/settlement/role/money/migration guardrail hooks, and traceability commands. Extends the claude-harness-engine plugin. Requires claude-harness-engine >= 1.1.4 installed alongside.",
+  "author": {
+    "name": "MediCard AI-Native Engineer (BC-AINE-017)"
+  },
+  "keywords": [
+    "insurance",
+    "health-cashless",
+    "pre-authorization",
+    "settlement",
+    "claude-harness-engine"
+  ],
+  "agents": [
+    "./.claude/agents/medicard-eligibility-agent.md",
+    "./.claude/agents/medicard-preauth-decider-agent.md",
+    "./.claude/agents/medicard-settlement-agent.md",
+    "./.claude/agents/medicard-state-machine-validator-agent.md",
+    "./.claude/agents/medicard-archtest-author-agent.md",
+    "./.claude/agents/medicard-audit-tracer-agent.md",
+    "./.claude/agents/medicard-janitor-agent.md",
+    "./.claude/agents/medicard-doc-writer-agent.md"
+  ],
+  "skills": [
+    "./.claude/skills/eligibility-resolver",
+    "./.claude/skills/pre-auth-auto-decider",
+    "./.claude/skills/settlement-calculator",
+    "./.claude/skills/claim-state-machine",
+    "./.claude/skills/phi-safe-logging",
+    "./.claude/skills/audit-tracer"
+  ],
+  "commands": [
+    "./.claude/commands/ac-trace.md",
+    "./.claude/commands/settlement-audit.md",
+    "./.claude/commands/sprint-pr.md"
+  ],
+  "hooks": "./.claude/hooks/medicard-hooks.json",
+  "mcpServers": "./.mcp.json"
+}
