@@ -1,0 +1,47 @@
+{
+  "group": "C",
+  "sprint": 3,
+  "title": "Admission, case lifecycle, final bill cap, settlement, timeline & notifications",
+  "stories": ["E3-S1", "E3-S2", "E3-S3", "E3-S4"],
+  "features": ["F020", "F021", "F022", "F023", "F024", "F025", "F026", "F027", "F028"],
+  "negotiation": {
+    "proposed_by": "generator",
+    "reviewed_by": "evaluator",
+    "changes_by_evaluator": [
+      "Added api-205 (bill exactly at cap 110000.00 accepted) next to api-206 (110000.01 rejected) - boundary pair",
+      "Added api-212 (settling twice -> 409 CASE_SETTLED_IMMUTABLE, NFR-08)",
+      "Added architecture check: every mutating case operation on a SETTLED case raises",
+      "Removed 'discharge requires final bill': not in admission_spec (AM-R5)"
+    ],
+    "approved": true
+  },
+  "contract": {
+    "api_checks": [
+      { "id": "api-201", "method": "POST", "path": "/api/cases/{id}/admit", "description": "AC-08.1 approved pre-auth -> ADMITTED", "expected_status": 200 },
+      { "id": "api-202", "method": "POST", "path": "/api/cases/{id}/admit", "description": "AC-08.5 pending pre-auth -> 422 PREAUTH_NOT_APPROVED", "expected_status": 422 },
+      { "id": "api-203", "method": "POST", "path": "/api/cases/{id}/discharge", "description": "AC-08.3 PRE_AUTH -> DISCHARGED -> 409 INVALID_CLAIM_STATE", "expected_status": 409 },
+      { "id": "api-204", "method": "POST", "path": "/api/cases/{id}/procedures", "description": "AC-06.1 procedure while ADMITTED -> 201", "expected_status": 201 },
+      { "id": "api-205", "method": "POST", "path": "/api/cases/{id}/final-bill", "body": {"amount": "110000.00"}, "description": "AC-06.2 approved 100000.00, buffer 10% -> accepted", "expected_status": 201 },
+      { "id": "api-206", "method": "POST", "path": "/api/cases/{id}/final-bill", "body": {"amount": "110000.01"}, "description": "AC-06.3 -> 422 BILL_EXCEEDS_CAP, not stored", "expected_status": 422 },
+      { "id": "api-207", "method": "POST", "path": "/api/cases/{id}/settle", "description": "AC-07.6 bill 90000.00, ded 5000.00, copay 10% -> 76500.00 + PAYSTUB ref", "expected_status": 200 },
+      { "id": "api-208", "method": "GET", "path": "/api/customers/me/coverage", "description": "ST-R7 remaining sum insured reduced by settled amount", "expected_status": 200 },
+      { "id": "api-209", "method": "POST", "path": "/api/cases/{id}/close", "description": "AC-08.1 SETTLED -> CLOSED", "expected_status": 200 },
+      { "id": "api-210", "method": "POST", "path": "/api/cases/{id}/dispute", "description": "AC-08.2 DISCHARGED -> DISPUTED -> CLOSED", "expected_status": 200 },
+      { "id": "api-211", "method": "GET", "path": "/api/cases/{id}/timeline", "description": "AC-09.2 hospital and customer see identical ordered timeline; other hospital 404", "expected_status": 200 },
+      { "id": "api-212", "method": "POST", "path": "/api/cases/{id}/settle", "description": "NFR-08 settle twice -> 409 CASE_SETTLED_IMMUTABLE", "expected_status": 409 },
+      { "id": "api-213", "method": "GET", "path": "/api/customers/me/notifications", "description": "AC-09.1 one STUB notification per transition, in order", "expected_status": 200 },
+      { "id": "api-214", "method": "GET", "path": "/api/cases/{id}/settlement", "description": "ST-R8 breakdown: pre-auth amount, final bill, deductible, co-pay, paid", "expected_status": 200 }
+    ],
+    "playwright_checks": [],
+    "design_checks": {},
+    "performance_checks": [
+      { "endpoint": "/api/cases/{id}/settle", "max_response_time_ms": 500, "method": "POST" }
+    ],
+    "architecture_checks": {
+      "settled_immutable": { "required": true, "description": "tests/architecture/test_settled_cases_immutable.py" },
+      "bill_cap_enforced": { "required": true, "description": "tests/architecture/test_bill_cap_enforced.py + settlement-cap-check hook" },
+      "append_only": { "required": true, "description": "case_events, procedures, final_bills, settlements, notifications have abort triggers" },
+      "money": { "required": true, "description": "settlement math Decimal-only; float input -> TypeError" }
+    }
+  }
+}

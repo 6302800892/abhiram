@@ -1,0 +1,3 @@
+>       assert missing == [], f"undocumented error codes (add them to specs/app_spec.md §7.1): {missing}"
+E       AssertionError: undocumented error codes (add them to specs/app_spec.md §7.1): ['ADMISSION_DATE_IN_PAST', 'CASE_NOT_FOUND', 'DISPUTE_REASON_REQUIRED', 'FINAL_BILL_REQUIRED', 'FORBIDDEN', 'FULL_NAME_REQUIRED', 'HOSPITAL_EXISTS', 'HOSPITAL_NOT_FOUND', 'HTTP_ERROR', 'INTERNAL_ERROR', 'INVALID_B
+1 failed, 1 passed, 1 warning in 1.16s

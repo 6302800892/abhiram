@@ -1,0 +1,592 @@
+[
+  {
+    "id": "F001",
+    "category": "performance",
+    "story": "E1-S1",
+    "group": "A",
+    "description": "Health endpoint returns 200 within 1s of startup",
+    "steps": [
+      "Start app",
+      "GET /health",
+      "Assert 200 and elapsed < 1s"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F002",
+    "category": "security",
+    "story": "E1-S1",
+    "group": "A",
+    "description": "Login issues a token for seeded users and rejects bad passwords",
+    "steps": [
+      "POST /api/auth/login valid",
+      "Assert 200 token",
+      "POST wrong password",
+      "Assert 401"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F003",
+    "category": "functional",
+    "story": "E1-S1",
+    "group": "A",
+    "description": "Tampered migration aborts startup",
+    "steps": [
+      "Apply migrations",
+      "Modify an applied file",
+      "Re-run",
+      "Assert MigrationTamperedError"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F004",
+    "category": "functional",
+    "story": "E1-S2",
+    "group": "A",
+    "description": "Customer registration returns 201 and rejects duplicates",
+    "steps": [
+      "POST /api/customers/register",
+      "Assert 201",
+      "Repeat",
+      "Assert 409"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F005",
+    "category": "functional",
+    "story": "E1-S2",
+    "group": "A",
+    "description": "Policy link validates member identity",
+    "steps": [
+      "POST /api/customers/me/policies with wrong DOB",
+      "Assert 422 POLICY_LINK_MISMATCH"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F006",
+    "category": "functional",
+    "story": "E1-S3",
+    "group": "A",
+    "description": "Coverage view returns sum insured, exclusions and network hospitals",
+    "steps": [
+      "Link policy",
+      "GET /api/customers/me/coverage",
+      "Assert fields present"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F007",
+    "category": "functional",
+    "story": "E1-S4",
+    "group": "A",
+    "description": "Eligibility returns ELIGIBLE with ELG-OK for a covered member",
+    "steps": [
+      "POST /api/eligibility",
+      "Assert ELIGIBLE"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F008",
+    "category": "functional",
+    "story": "E1-S4",
+    "group": "A",
+    "description": "Eligibility returns NOT_ELIGIBLE with all failing reason codes",
+    "steps": [
+      "POST /api/eligibility lapsed policy",
+      "Assert reason codes"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F009",
+    "category": "security",
+    "story": "E1-S4",
+    "group": "A",
+    "description": "Eligibility is HOSPITAL-only",
+    "steps": [
+      "POST /api/eligibility with customer token",
+      "Assert 403"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F010",
+    "category": "functional",
+    "story": "E1-S5",
+    "group": "A",
+    "description": "Coverage rule publish creates a new version",
+    "steps": [
+      "POST /api/admin/products/SILVER/coverage-rules",
+      "Assert version 2 current"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F011",
+    "category": "security",
+    "story": "E1-S5",
+    "group": "A",
+    "description": "Admin endpoints reject non-admin roles",
+    "steps": [
+      "GET /api/admin/hospitals with hospital token",
+      "Assert 403"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T21:40:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F012",
+    "category": "functional",
+    "story": "E2-S1",
+    "group": "B",
+    "description": "Pre-auth submission enters PENDING",
+    "steps": [
+      "POST /api/preauths",
+      "Assert 201 and decisions[0] PENDING"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F013",
+    "category": "functional",
+    "story": "E2-S1",
+    "group": "B",
+    "description": "Pre-auth submission validates input",
+    "steps": [
+      "POST /api/preauths estimated_cost=0",
+      "Assert 422"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F014",
+    "category": "functional",
+    "story": "E2-S2",
+    "group": "B",
+    "description": "Auto-approval boundary is inclusive at the threshold",
+    "steps": [
+      "Submit estimate == threshold",
+      "Assert APPROVED"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F015",
+    "category": "functional",
+    "story": "E2-S2",
+    "group": "B",
+    "description": "Auto-approval is capped at the policy cap",
+    "steps": [
+      "Submit with low remaining cover",
+      "Assert PARTIALLY_APPROVED at cap"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F016",
+    "category": "functional",
+    "story": "E2-S2",
+    "group": "B",
+    "description": "Excluded diagnosis is auto-rejected",
+    "steps": [
+      "Submit excluded code",
+      "Assert REJECTED decided_by SYSTEM"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F017",
+    "category": "functional",
+    "story": "E2-S3",
+    "group": "B",
+    "description": "Adjudicator partial approval records amount and reason",
+    "steps": [
+      "POST /api/preauths/{id}/decisions",
+      "Assert PARTIALLY_APPROVED"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F018",
+    "category": "security",
+    "story": "E2-S3",
+    "group": "B",
+    "description": "Hospitals cannot post decisions",
+    "steps": [
+      "POST decision with hospital token",
+      "Assert 403"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F019",
+    "category": "functional",
+    "story": "E2-S4",
+    "group": "B",
+    "description": "Query response returns pre-auth to PENDING",
+    "steps": [
+      "POST /api/preauths/{id}/query-response",
+      "Assert PENDING"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:30:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F020",
+    "category": "functional",
+    "story": "E3-S1",
+    "group": "C",
+    "description": "Invalid case transition returns 409 INVALID_CLAIM_STATE",
+    "steps": [
+      "POST discharge on PRE_AUTH case",
+      "Assert 409"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F021",
+    "category": "functional",
+    "story": "E3-S1",
+    "group": "C",
+    "description": "Case happy path reaches CLOSED",
+    "steps": [
+      "admit",
+      "discharge",
+      "settle",
+      "close",
+      "Assert CLOSED"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F022",
+    "category": "functional",
+    "story": "E3-S2",
+    "group": "C",
+    "description": "Final bill at cap boundary is accepted",
+    "steps": [
+      "POST final-bill 110000.00",
+      "Assert 201"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F023",
+    "category": "functional",
+    "story": "E3-S2",
+    "group": "C",
+    "description": "Final bill above cap is rejected",
+    "steps": [
+      "POST final-bill 110000.01",
+      "Assert 422 BILL_EXCEEDS_CAP"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F024",
+    "category": "functional",
+    "story": "E3-S3",
+    "group": "C",
+    "description": "Settlement formula matches worked example 76500.00",
+    "steps": [
+      "Settle case bill 90000 ded 5000 copay 10%",
+      "Assert 76500.00"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F025",
+    "category": "functional",
+    "story": "E3-S3",
+    "group": "C",
+    "description": "Settlement never negative when deductible exceeds bill",
+    "steps": [
+      "Calculator bill 3000 ded 5000",
+      "Assert 0.00"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F026",
+    "category": "functional",
+    "story": "E3-S3",
+    "group": "C",
+    "description": "Settled case cannot be settled again",
+    "steps": [
+      "Settle twice",
+      "Assert 409"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F027",
+    "category": "functional",
+    "story": "E3-S4",
+    "group": "C",
+    "description": "Customer gets one notification per transition",
+    "steps": [
+      "Drive case to SETTLED",
+      "GET notifications",
+      "Assert ordered list"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F028",
+    "category": "security",
+    "story": "E3-S4",
+    "group": "C",
+    "description": "Other hospital cannot view timeline",
+    "steps": [
+      "GET timeline with other hospital",
+      "Assert 404"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T23:20:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F029",
+    "category": "functional",
+    "story": "E4-S1",
+    "group": "D",
+    "description": "Override writes audit record with actor and timestamp",
+    "steps": [
+      "POST override",
+      "GET /api/admin/audit",
+      "Assert record"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F030",
+    "category": "security",
+    "story": "E4-S1",
+    "group": "D",
+    "description": "Insurer cannot override",
+    "steps": [
+      "POST override with insurer token",
+      "Assert 403"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F031",
+    "category": "functional",
+    "story": "E4-S2",
+    "group": "D",
+    "description": "Reports summary returns all metrics",
+    "steps": [
+      "GET /api/reports/summary",
+      "Assert keys"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F032",
+    "category": "security",
+    "story": "E4-S2",
+    "group": "D",
+    "description": "Reports reject hospital role",
+    "steps": [
+      "GET with hospital token",
+      "Assert 403"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F033",
+    "category": "ui",
+    "story": "E5-S1",
+    "group": "E",
+    "description": "Login routes each role to its workspace",
+    "steps": [
+      "Open /",
+      "Log in as hospital",
+      "Assert Hospital workspace heading"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F034",
+    "category": "ui",
+    "story": "E5-S1",
+    "group": "E",
+    "description": "Layout is responsive at 375px",
+    "steps": [
+      "Set viewport 375x800",
+      "Assert nav stacks"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F035",
+    "category": "ui",
+    "story": "E5-S2",
+    "group": "E",
+    "description": "Hospital checks eligibility and submits pre-auth in the UI",
+    "steps": [
+      "Fill eligibility form",
+      "Assert ELIGIBLE",
+      "Submit pre-auth",
+      "Assert status"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F036",
+    "category": "ui",
+    "story": "E5-S3",
+    "group": "E",
+    "description": "Customer sees coverage and timeline",
+    "steps": [
+      "Log in as customer",
+      "Assert coverage card",
+      "Open case",
+      "Assert timeline"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F037",
+    "category": "ui",
+    "story": "E5-S4",
+    "group": "E",
+    "description": "Adjudicator approves from queue",
+    "steps": [
+      "Log in as insurer",
+      "Approve first queue item",
+      "Assert removed"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  },
+  {
+    "id": "F038",
+    "category": "ui",
+    "story": "E5-S4",
+    "group": "E",
+    "description": "Admin overrides from UI and sees audit entry",
+    "steps": [
+      "Log in as admin",
+      "Override",
+      "Assert audit row"
+    ],
+    "passes": true,
+    "last_evaluated": "2026-10-01T22:10:00+05:30",
+    "failure_reason": null,
+    "failure_layer": null
+  }
+]

@@ -1,0 +1,13 @@
+E       AssertionError: {"error":{"code":"BILL_EXCEEDS_CAP","message":"final bill exceeds pre_auth_amount + 5% buffer","details":{"cap":"105000.00","final_bill":"108000.00"}}}
+E       AssertionError: assert ('5', '105000..., '105000.00') == ('10', '11000...', '92700.00')
+E         
+E         At index 0 diff: '5' != '10'
+E         Use -v to get more diff
+E       AssertionError: {"error":{"code":"PREAUTH_NOT_REJECTED","message":"a pre-auth case can be closed only after rejection"}}
+FAILED tests/api/test_fix_loop_rule_version.py::test_c01a_bill_cap_keeps_the_preauth_rule_version
+FAILED tests/api/test_fix_loop_rule_version.py::test_c01b_settlement_uses_the_preauth_rule_version
+FAILED tests/api/test_fix_loop_rule_version.py::test_c02_closing_pre_auth_case_with_live_preauth_is_invalid_claim_state
+3 failed, 1 passed, 1 warning in 2.14s
+FAILED tests/architecture/test_bill_cap_enforced.py::test_money_paths_never_read_the_current_rule_version[case_service.py-bill_terms]
+FAILED tests/architecture/test_bill_cap_enforced.py::test_money_paths_never_read_the_current_rule_version[settlement_service.py-_settlement_input]
+2 failed, 5 passed, 1 warning in 0.33s

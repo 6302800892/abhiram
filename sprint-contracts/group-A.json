@@ -1,0 +1,45 @@
+{
+  "group": "A",
+  "sprint": 1,
+  "title": "Eligibility, coverage & network admin + platform foundation",
+  "stories": ["E1-S1", "E1-S2", "E1-S3", "E1-S4", "E1-S5"],
+  "features": ["F001", "F002", "F003", "F004", "F005", "F006", "F007", "F008", "F009", "F010", "F011"],
+  "negotiation": {
+    "proposed_by": "generator",
+    "reviewed_by": "evaluator",
+    "changes_by_evaluator": [
+      "Added api-008 (lapsed policy must return BOTH inactive and out-of-period codes, AC-02.4)",
+      "Added api-012 (hospital token on admin endpoint -> 403, NA-AC7)",
+      "Removed a check on hospital deletion: not traceable to any AC (NA-R1 says never deleted)"
+    ],
+    "approved": true
+  },
+  "contract": {
+    "api_checks": [
+      { "id": "api-001", "method": "GET", "path": "/health", "expected_status": 200, "max_response_time_ms": 1000, "description": "NFR-07 health within 1s" },
+      { "id": "api-002", "method": "POST", "path": "/api/auth/login", "body": {"username": "cityhosp.desk", "password": "Demo@1234"}, "expected_status": 200, "description": "Seeded hospital user logs in" },
+      { "id": "api-003", "method": "POST", "path": "/api/auth/login", "body": {"username": "cityhosp.desk", "password": "wrong-pass"}, "expected_status": 401, "description": "Wrong password rejected" },
+      { "id": "api-004", "method": "POST", "path": "/api/customers/register", "expected_status": 201, "description": "AC-01.1 register" },
+      { "id": "api-005", "method": "POST", "path": "/api/customers/me/policies", "expected_status": 201, "description": "AC-01.3 link with matching identity" },
+      { "id": "api-006", "method": "GET", "path": "/api/customers/me/coverage", "expected_status": 200, "description": "AC-01.5 sum insured, exclusions, network hospitals" },
+      { "id": "api-007", "method": "POST", "path": "/api/eligibility", "body": {"member_id": "MBR-1001", "policy_number": "POL-SLV-0001"}, "expected_status": 200, "expected_body": {"status": "ELIGIBLE", "reason_codes": ["ELG-OK"]}, "description": "AC-02.1" },
+      { "id": "api-008", "method": "POST", "path": "/api/eligibility", "body": {"member_id": "MBR-3001", "policy_number": "POL-SLV-0003"}, "expected_status": 200, "expected_body": {"status": "NOT_ELIGIBLE"}, "description": "AC-02.4 lapsed: ELG-POLICY-INACTIVE + ELG-OUTSIDE-COVER-PERIOD" },
+      { "id": "api-009", "method": "POST", "path": "/api/eligibility", "description": "AC-02.7 customer token -> 403", "expected_status": 403 },
+      { "id": "api-010", "method": "POST", "path": "/api/admin/products/SILVER/coverage-rules", "expected_status": 201, "description": "NA-AC3 publish version n+1" },
+      { "id": "api-011", "method": "PATCH", "path": "/api/admin/hospitals/CITYHOSP", "body": {"in_network": false}, "expected_status": 200, "description": "NA-AC2 network toggle" },
+      { "id": "api-012", "method": "GET", "path": "/api/admin/hospitals", "description": "NA-AC7 hospital token -> 403", "expected_status": 403 }
+    ],
+    "playwright_checks": [],
+    "design_checks": {},
+    "performance_checks": [
+      { "endpoint": "/health", "max_response_time_ms": 1000, "method": "GET" }
+    ],
+    "architecture_checks": {
+      "layering": { "required": true, "description": "lint-imports: 3 contracts kept" },
+      "typing": { "required": true, "description": "mypy --strict src passes" },
+      "migrations": { "required": true, "description": "0001 applied with checksum ledger; tamper -> MigrationTamperedError" },
+      "append_only": { "required": true, "description": "coverage_rule_versions UPDATE/DELETE abort" },
+      "env_vars": { "required": true, "description": "No hardcoded secrets; token secret from MEDICARD_SECRET or per-process random" }
+    }
+  }
+}

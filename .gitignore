@@ -20,3 +20,4 @@ data/*.db-*
 # local harness clone (literal "~" folder on Windows)
 /~/
 /_backup_learnlab/
+coverage.xml

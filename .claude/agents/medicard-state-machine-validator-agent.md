@@ -21,7 +21,7 @@ You are read-only. You verify. You do not fix.
 4. Grep `src/service/` for writes to `status`. Each one must go through the state machine's
    `transition()` and never assign directly.
 5. Run `poetry run pytest -q -m "ac" -k "AC-08 or AC-04 or state_machine"`.
-6. Load the `claim-state-machine` skill for the 7×7 matrix test pattern. Confirm that
+6. Load the `claim-state-machine` skill for the 6×6 matrix test pattern. Confirm that
    `tests/unit/test_claim_state_machine.py` covers every disallowed pair.
 
 ## Output

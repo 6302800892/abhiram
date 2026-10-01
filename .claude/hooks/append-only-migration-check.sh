@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# PreToolUse(Write|Edit): NFR-05 — migrations are append-only. Editing or overwriting a migration
-# that is already committed is blocked; add a new migrations/NNNN_<name>.sql instead.
+# PreToolUse(Write|Edit): NFR-05 — migrations are append-only. A migration file that already
+# exists on disk may never be edited or overwritten; add the next migrations/NNNN_<name>.sql.
+# (The runtime counterpart is the SHA-256 ledger in schema_migrations -> MigrationTamperedError.)
 HOOK_NAME="append-only-migration-check"
 source "$(dirname "$0")/lib/hook-input.sh"
 
@@ -16,10 +17,7 @@ if ! printf '%s' "$BASENAME" | grep -qE '^[0-9]{4}_[a-z0-9_]+\.sql$'; then
 fi
 
 if [ -f "$FILE" ]; then
-  REPO="$(git -C "$(dirname "$FILE")" rev-parse --show-toplevel 2>/dev/null)"
-  if [ -n "$REPO" ] && git -C "$REPO" ls-files --error-unmatch "$FILE" >/dev/null 2>&1; then
-    hook_block "$BASENAME is a committed migration and is append-only (NFR-05).
+  hook_block "$BASENAME already exists and migrations are append-only (NFR-05).
 Fix: create the next numbered migration file instead of editing this one."
-  fi
 fi
 exit 0

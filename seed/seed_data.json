@@ -1,0 +1,78 @@
+{
+  "_comment": "Synthetic data only (Synthetic-Data Rule). Names, IDs and policies are fictional. Dates are offsets in days from 'today' so the demo never expires.",
+  "demo_password": "Demo@1234",
+  "hospitals": [
+    { "code": "CITYHOSP", "name": "City Care Hospital", "city": "Hyderabad", "in_network": true },
+    { "code": "SUNSHINE", "name": "Sunshine Multispeciality", "city": "Pune", "in_network": true },
+    { "code": "LAKEVIEW", "name": "Lakeview Medical Centre", "city": "Chennai", "in_network": true },
+    { "code": "NONNET", "name": "Greenfield Clinic", "city": "Bengaluru", "in_network": false }
+  ],
+  "products": [
+    {
+      "code": "SILVER", "name": "MediCard Silver", "sum_insured": "500000.00", "annual_premium": "12000.00",
+      "rule": {
+        "auto_approve_threshold": "50000.00",
+        "auto_approved_diagnoses": ["K35.8", "J18.9", "O80", "S52.5"],
+        "excluded_diagnoses": ["Z41.1", "F10.2"],
+        "per_claim_cap": "200000.00", "buffer_pct": "10", "deductible": "5000.00", "copay_pct": "10"
+      }
+    },
+    {
+      "code": "GOLD", "name": "MediCard Gold", "sum_insured": "1000000.00", "annual_premium": "20000.00",
+      "rule": {
+        "auto_approve_threshold": "100000.00",
+        "auto_approved_diagnoses": ["K35.8", "J18.9", "O80", "S52.5", "N20.0", "H25.9"],
+        "excluded_diagnoses": ["Z41.1"],
+        "per_claim_cap": "500000.00", "buffer_pct": "15", "deductible": "0.00", "copay_pct": "0"
+      }
+    }
+  ],
+  "users": [
+    { "username": "asha.verma", "role": "CUSTOMER", "display_name": "Asha Verma" },
+    { "username": "kiran.rao", "role": "CUSTOMER", "display_name": "Kiran Rao" },
+    { "username": "farah.khan", "role": "CUSTOMER", "display_name": "Farah Khan" },
+    { "username": "cityhosp.desk", "role": "HOSPITAL", "display_name": "City Care Cashless Desk", "hospital": "CITYHOSP" },
+    { "username": "sunshine.desk", "role": "HOSPITAL", "display_name": "Sunshine Cashless Desk", "hospital": "SUNSHINE" },
+    { "username": "greenfield.desk", "role": "HOSPITAL", "display_name": "Greenfield Front Desk", "hospital": "NONNET" },
+    { "username": "adjudicator.priya", "role": "INSURER", "display_name": "Priya (Adjudicator)" },
+    { "username": "admin.sam", "role": "ADMIN", "display_name": "Sam (Insurer Admin)" }
+  ],
+  "policies": [
+    {
+      "policy_number": "POL-SLV-0001", "product": "SILVER", "status": "ACTIVE",
+      "cover_start_offset_days": -180, "cover_end_offset_days": 185, "prior_claims_paid": "0.00",
+      "members": [
+        { "member_id": "MBR-1001", "full_name": "Asha Verma", "date_of_birth": "1988-04-12", "relationship": "SELF", "customer": "asha.verma" },
+        { "member_id": "MBR-1002", "full_name": "Rohan Verma", "date_of_birth": "2015-09-03", "relationship": "CHILD" }
+      ]
+    },
+    {
+      "policy_number": "POL-GLD-0002", "product": "GOLD", "status": "ACTIVE",
+      "cover_start_offset_days": -90, "cover_end_offset_days": 275, "prior_claims_paid": "0.00",
+      "members": [
+        { "member_id": "MBR-2001", "full_name": "Kiran Rao", "date_of_birth": "1975-11-30", "relationship": "SELF", "customer": "kiran.rao" }
+      ]
+    },
+    {
+      "policy_number": "POL-SLV-0003", "product": "SILVER", "status": "LAPSED",
+      "cover_start_offset_days": -545, "cover_end_offset_days": -180, "prior_claims_paid": "0.00",
+      "members": [
+        { "member_id": "MBR-3001", "full_name": "Meera Iyer", "date_of_birth": "1990-01-22", "relationship": "SELF" }
+      ]
+    },
+    {
+      "policy_number": "POL-SLV-0004", "product": "SILVER", "status": "ACTIVE",
+      "cover_start_offset_days": -200, "cover_end_offset_days": 165, "prior_claims_paid": "500000.00",
+      "members": [
+        { "member_id": "MBR-4001", "full_name": "Dev Nair", "date_of_birth": "1982-06-15", "relationship": "SELF" }
+      ]
+    },
+    {
+      "policy_number": "POL-GLD-0005", "product": "GOLD", "status": "ACTIVE",
+      "cover_start_offset_days": -30, "cover_end_offset_days": 335, "prior_claims_paid": "960000.00",
+      "members": [
+        { "member_id": "MBR-5001", "full_name": "Farah Khan", "date_of_birth": "1995-03-08", "relationship": "SELF", "customer": "farah.khan" }
+      ]
+    }
+  ]
+}

@@ -10,7 +10,7 @@ case "$FILE" in
 esac
 [ -f "$FILE" ] || exit 0
 
-HITS="$(grep -nE '(\bfloat\(|:[[:space:]]*float\b|->[[:space:]]*float\b|Decimal\([0-9]+\.[0-9]+\))' "$FILE" | grep -v 'noqa: money-float')"
+HITS="$(grep -nE '(\bfloat\(|:[[:space:]]*float\b|->[[:space:]]*float\b|Decimal\([0-9]+\.[0-9]+\))' "$FILE" | grep -v 'money-float-ok')"
 if [ -n "$HITS" ]; then
   hook_block "float used for money in $FILE (NFR-01):
 $HITS

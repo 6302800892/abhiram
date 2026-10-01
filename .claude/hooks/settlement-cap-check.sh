@@ -19,7 +19,9 @@ Fix: call assert_settlement_invariant(settlement, admissible) before returning. 
   fi
 fi
 
-if grep -qE 'def submit_final_bill' "$FILE"; then
+# Only the service layer persists bills; controllers with the same function name just delegate.
+case "$FILE" in */src/service/*.py) SERVICE_FILE=1 ;; *) SERVICE_FILE=0 ;; esac
+if [ "$SERVICE_FILE" = 1 ] && grep -qE 'def submit_final_bill' "$FILE"; then
   if ! grep -qE 'ensure_bill_within_cap|bill_within_cap' "$FILE"; then
     hook_block "$FILE accepts a final bill without the cap check (AC-06: final_bill <= pre_auth_amount + buffer).
 Fix: call ensure_bill_within_cap(...) from src/domain/bill_rules.py before persisting."

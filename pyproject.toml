@@ -36,6 +36,7 @@ build-backend = "poetry.core.masonry.api"
 # ---------------------------------------------------------------- tests / coverage
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-q --strict-markers"
 markers = [
     "ac(id): acceptance criterion this test verifies, e.g. @pytest.mark.ac('AC-07')",

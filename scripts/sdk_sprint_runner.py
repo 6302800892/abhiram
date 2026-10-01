@@ -96,7 +96,7 @@ def read_verdict(group: str) -> tuple[bool, str]:
 
 def log_iteration(group: str, attempt: int, passed: bool) -> None:
     log = REPO_ROOT / ".claude" / "state" / "iteration-log.md"
-    stamp = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
+    stamp = dt.datetime.now(dt.UTC).isoformat(timespec="seconds")
     status = "PASS" if passed else f"FAIL (attempt {attempt})"
     with log.open("a", encoding="utf-8") as fh:
         fh.write(f"\n## Group {group} — SDK sprint runner\n- **Date:** {stamp}\n- **Status:** {status}\n")

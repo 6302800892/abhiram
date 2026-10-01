@@ -1,0 +1,24 @@
+- region "Eligibility check":
+  - heading "Eligibility check" [level=2]
+  - text: Member ID
+  - textbox "Member ID"
+  - text: Policy number
+  - textbox "Policy number"
+  - button "Check eligibility"
+- region "New pre-authorization":
+  - heading "New pre-authorization" [level=2]
+  - text: Member ID
+  - textbox "Member ID"
+  - text: Policy number
+  - textbox "Policy number"
+  - text: Diagnosis code
+  - textbox "Diagnosis code":
+    - /placeholder: e.g. K35.8
+  - text: Estimated cost
+  - textbox "Estimated cost":
+    - /placeholder: "40000.00"
+  - text: Expected admission date
+  - textbox "Expected admission date"
+  - text: Clinical notes
+  - textbox "Clinical notes"
+  - button "Submit pre-auth"

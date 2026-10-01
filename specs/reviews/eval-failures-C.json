@@ -1,0 +1,103 @@
+{
+  "group": "C",
+  "sprint": 3,
+  "evaluated_at": "2026-10-01T16:05:00Z",
+  "verdict": "FAIL",
+  "failures": [
+    {
+      "failure": {
+        "id": "C-01a",
+        "layer": "api",
+        "gate": "evaluator",
+        "features": ["F022"],
+        "check": "Rule change mid-cycle: POST /api/cases/{id}/final-bill 108000.00 on a case whose pre-auth was approved for 100000.00 under SILVER v1 (buffer 10%) -> 201 with cap 110000.00",
+        "spec_refs": ["settlement_spec ST-R1", "preauth_spec PA-R3/PA-R4/PA-R6", "network_admin_spec NA-R4", "brief 8.2 #12"],
+        "reproduction": [
+          "Fresh DB. Login cityhosp.desk, adjudicator.priya, admin.sam (Demo@1234)",
+          "cityhosp.desk POST /api/preauths {member_id:MBR-1001, policy_number:POL-SLV-0001, diagnosis_code:I21.9, estimated_cost:'100000.00', expected_admission_date:<tomorrow>} -> 201 PENDING, rule_version SILVER v1",
+          "adjudicator.priya POST /api/preauths/{id}/decisions {status:APPROVED, reason_codes:[PA-APPROVED-MANUAL]} -> APPROVED 100000.00",
+          "cityhosp.desk POST /api/cases/{case_id}/admit {admitted_on:<tomorrow>} -> 200",
+          "admin.sam POST /api/admin/products/SILVER/coverage-rules with all v1 fields but buffer_pct '5' -> 201 version 2",
+          "cityhosp.desk POST /api/cases/{case_id}/final-bill {amount:'108000.00'}"
+        ],
+        "expected": { "status": 201, "body": { "version": 1, "amount": "108000.00", "cap": "110000.00" } },
+        "actual": {
+          "status": 422,
+          "body": "{\"error\":{\"code\":\"BILL_EXCEEDS_CAP\",\"message\":\"final bill exceeds pre_auth_amount + 5% buffer\",\"details\":{\"cap\":\"105000.00\",\"final_bill\":\"108000.00\"}}}"
+        },
+        "notes": "GET /api/preauths/{id} still reports rule_version SILVER v1. The cap uses the current (v2) buffer instead of the pre-auth's recorded version. A later settle returns 422 FINAL_BILL_REQUIRED because no bill could be stored.",
+        "stack_trace": "none (handled 422; no exception in the server log)",
+        "error_type": "assertion_error",
+        "files_likely_involved": [
+          "src/service/case_service.py",
+          "src/service/coverage_service.py",
+          "src/repository/product_repo.py",
+          "src/repository/preauth_repo.py",
+          "src/domain/bill_rules.py"
+        ],
+        "prior_attempts": []
+      }
+    },
+    {
+      "failure": {
+        "id": "C-01b",
+        "layer": "api",
+        "gate": "evaluator",
+        "features": ["F024"],
+        "check": "Bill accepted under one buffer is settled with the same cap: POST /api/cases/{id}/settle -> cap 110000.00, admissible 108000.00, settlement 92700.00",
+        "spec_refs": ["settlement_spec ST-R1/ST-R2/ST-R5", "preauth_spec PA-R3", "network_admin_spec NA-R4"],
+        "reproduction": [
+          "Create and approve a pre-auth for 100000.00 under SILVER v1 (as in C-01a), then admit",
+          "cityhosp.desk POST /api/cases/{case_id}/final-bill {amount:'108000.00'} -> 201 {cap:'110000.00'}",
+          "admin.sam publishes SILVER v2 with buffer_pct '5' (all other fields as v1)",
+          "cityhosp.desk POST /api/cases/{case_id}/discharge {discharged_on:<tomorrow>} -> 200",
+          "adjudicator.priya POST /api/cases/{case_id}/settle"
+        ],
+        "expected": {
+          "status": 200,
+          "body": { "buffer_pct": "10", "cap": "110000.00", "admissible": "108000.00", "deductible": "5000.00", "copay": "10300.00", "settlement_amount": "92700.00" }
+        },
+        "actual": {
+          "status": 200,
+          "body": "{\"case_id\":10,\"case_status\":\"SETTLED\",\"pre_auth_amount\":\"100000.00\",\"buffer_pct\":\"5\",\"cap\":\"105000.00\",\"final_bill\":\"108000.00\",\"admissible\":\"105000.00\",\"deductible\":\"5000.00\",\"copay\":\"10000.00\",\"settlement_amount\":\"90000.00\",\"payment_reference\":\"PAYSTUB-10-1\"}"
+        },
+        "notes": "The hospital is underpaid by 2700.00, and the settlement row is append-only so it cannot be corrected. The bill was validated against cap 110000.00 but settled against cap 105000.00. Deductible and copay_pct are probably also read from the current version.",
+        "stack_trace": "none (200 with wrong values)",
+        "error_type": "assertion_error",
+        "files_likely_involved": [
+          "src/service/settlement_service.py",
+          "src/service/coverage_service.py",
+          "src/repository/product_repo.py",
+          "src/domain/settlement_calculator.py"
+        ],
+        "prior_attempts": []
+      }
+    },
+    {
+      "failure": {
+        "id": "C-02",
+        "layer": "api",
+        "gate": "evaluator",
+        "features": ["F020"],
+        "check": "POST /api/cases/{id}/close on a PRE_AUTH case whose pre-auth is not REJECTED -> 409 INVALID_CLAIM_STATE",
+        "spec_refs": ["admission_spec AM-R1/AM-R6", "app_spec 6.2"],
+        "reproduction": [
+          "cityhosp.desk POST /api/preauths (I21.9, 100000.00) -> PRE_AUTH case, pre-auth PENDING",
+          "Optionally adjudicator.priya approves it",
+          "adjudicator.priya POST /api/cases/{case_id}/close"
+        ],
+        "expected": { "status": 409, "error_code": "INVALID_CLAIM_STATE" },
+        "actual": { "status": 422, "error_code": "PREAUTH_NOT_REJECTED" },
+        "notes": "Reproduced for both APPROVED and PENDING pre-auths. The case correctly stays PRE_AUTH. PREAUTH_NOT_REJECTED is not defined anywhere in specs/. Per §6.2, PRE_AUTH -> CLOSED is allowed only when the pre-auth is REJECTED, and every other transition must raise InvalidClaimStateException (409).",
+        "stack_trace": "none (handled 422)",
+        "error_type": "assertion_error",
+        "files_likely_involved": [
+          "src/service/case_service.py",
+          "src/domain/claim_state_machine.py",
+          "src/api/errors.py"
+        ],
+        "prior_attempts": []
+      }
+    }
+  ]
+}

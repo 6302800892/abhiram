@@ -1,0 +1,40 @@
+{
+  "group": "D",
+  "sprint": 4,
+  "title": "Audited admin override (AC-10) & operational reports",
+  "stories": ["E4-S1", "E4-S2"],
+  "features": ["F029", "F030", "F031", "F032"],
+  "negotiation": {
+    "proposed_by": "generator",
+    "reviewed_by": "evaluator",
+    "changes_by_evaluator": [
+      "Added api-304: a failed audit write must roll back the override decision (AD-R7 'no audit record => no override')",
+      "Added api-306: override of a MANUAL rejection is not allowed (only SYSTEM auto-rejections or QUERY_RAISED)",
+      "Required loss ratio to be Decimal strings, not JSON floats (NFR-01)"
+    ],
+    "approved": true
+  },
+  "contract": {
+    "api_checks": [
+      { "id": "api-301", "method": "POST", "path": "/api/admin/preauths/{id}/override", "description": "AC-10.1 auto-rejected (Z41.1) -> APPROVED with PA-OVERRIDE + audit record (actor, timestamp, reason, from/to)", "expected_status": 200 },
+      { "id": "api-302", "method": "POST", "path": "/api/admin/preauths/{id}/override", "description": "AC-10.2 QUERY_RAISED -> PARTIALLY_APPROVED, audited", "expected_status": 200 },
+      { "id": "api-303", "method": "POST", "path": "/api/admin/preauths/{id}/override", "description": "AC-10.3 INSURER -> 403, no audit row", "expected_status": 403 },
+      { "id": "api-304", "method": "POST", "path": "/api/admin/preauths/{id}/override", "description": "AD-R7 audit failure rolls back decision (unit/architecture test)", "expected_status": 500 },
+      { "id": "api-305", "method": "POST", "path": "/api/admin/preauths/{id}/override", "description": "AC-10.4 blank reason -> 422 OVERRIDE_REASON_REQUIRED", "expected_status": 422 },
+      { "id": "api-306", "method": "POST", "path": "/api/admin/preauths/{id}/override", "description": "AC-10.5 manual rejection / approved -> 422 OVERRIDE_NOT_ALLOWED", "expected_status": 422 },
+      { "id": "api-307", "method": "GET", "path": "/api/admin/audit", "description": "AD-R8 newest first, ADMIN only", "expected_status": 200 },
+      { "id": "api-308", "method": "GET", "path": "/api/reports/summary", "description": "RP-R1..RP-R5 all metrics present, money/ratios as strings", "expected_status": 200 },
+      { "id": "api-309", "method": "GET", "path": "/api/reports/summary", "description": "RP-AC5 hospital -> 403", "expected_status": 403 }
+    ],
+    "playwright_checks": [],
+    "design_checks": {},
+    "performance_checks": [
+      { "endpoint": "/api/reports/summary", "max_response_time_ms": 500, "method": "GET" }
+    ],
+    "architecture_checks": {
+      "override_audited": { "required": true, "description": "tests/architecture/test_override_audited.py: ADMIN-only route + audit in same transaction" },
+      "append_only": { "required": true, "description": "audit_records UPDATE/DELETE abort" },
+      "migrations": { "required": true, "description": "0004 added, 0001-0003 unchanged" }
+    }
+  }
+}

@@ -24,7 +24,7 @@ def test_files() -> list[pathlib.Path]:
     for folder, pattern in TEST_GLOBS:
         base = ROOT / folder
         if base.exists():
-            files.extend(sorted(base.rglob(pattern)))
+            files.extend(sorted(p for p in base.rglob(pattern) if p.is_file()))  # snapshot dirs share names
     return files
 
 

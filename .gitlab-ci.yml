@@ -28,7 +28,6 @@ lint:
     - poetry run ruff check .
     - poetry run lint-imports          # layering contracts (import-linter)
     - poetry run mypy src
-    - apt-get update -qq && apt-get install -y -qq git >/dev/null
     - bash scripts/test-hooks.sh       # project guardrail hooks behave as specified
 
 test:
@@ -49,17 +48,19 @@ test:
 
 e2e:
   stage: e2e
-  image: mcr.microsoft.com/playwright:v1.56.0-noble
+  image: mcr.microsoft.com/playwright:v1.63.0-noble   # must match @playwright/test in frontend/package-lock.json
+  variables:
+    MEDICARD_PYTHON: ".venv/bin/python"                # relative to the repo root (Playwright webServer cwd)
   before_script:
     - apt-get update -qq && apt-get install -y -qq python3 python3-pip python3-venv >/dev/null
     - python3 -m venv /opt/poetry && /opt/poetry/bin/pip install --quiet "poetry>=2.0"
-    - /opt/poetry/bin/poetry install --no-interaction
+    - POETRY_VIRTUALENVS_IN_PROJECT=true /opt/poetry/bin/poetry install --no-interaction --only main
     - cd frontend && npm ci && npm run build && cd ..
   script:
-    - cd frontend && POETRY=/opt/poetry/bin/poetry npx playwright test --grep-invert @visual
+    - cd frontend && npm run test:e2e:ci   # ARIA snapshots + journeys; pixel baselines (@visual) are local-only
   artifacts:
     when: always
-    paths: [frontend/playwright-report/]
+    paths: [frontend/playwright-report/, frontend/test-results/]
 
 # Claude Code in CI (GitLab equivalent of the Claude Code GitHub Action).
 # Needs masked CI variable ANTHROPIC_API_KEY. Runs the harness security-reviewer and MediCard

@@ -1,0 +1,9 @@
+- main:
+  - heading "MediCard" [level=1]
+  - paragraph: Cashless hospitalization & settlement
+  - text: Username
+  - textbox "Username"
+  - text: Password
+  - textbox "Password"
+  - button "Sign in"
+  - group: /Demo accounts \(password Demo@\d+\)/

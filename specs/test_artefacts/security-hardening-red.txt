@@ -1,0 +1,12 @@
+ERROR    medicard.api:errors.py:45 unhandled.error
+ERROR    medicard.api:errors.py:45 unhandled.error
+E       sqlite3.IntegrityError: UNIQUE constraint failed: settlements.case_id
+ERROR    medicard.api:errors.py:45 unhandled.error
+FAILED tests/api/test_security_hardening.py::test_sec06_non_ascii_token_is_401_not_500
+FAILED tests/api/test_security_hardening.py::test_sec07_absurd_money_is_422_invalid_money[1e30]
+FAILED tests/api/test_security_hardening.py::test_sec07_absurd_money_is_422_invalid_money[1e999999]
+FAILED tests/api/test_security_hardening.py::test_sec08_duplicate_settlement_insert_is_409_not_500
+FAILED tests/api/test_security_hardening.py::test_sec09_override_requires_case_still_in_pre_auth
+FAILED tests/api/test_security_hardening.py::test_sec12_short_secret_is_rejected
+FAILED tests/api/test_security_hardening.py::test_sec17_customer_without_profile_sees_no_unlinked_cases
+7 failed, 1 passed in 5.81s

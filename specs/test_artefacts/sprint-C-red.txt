@@ -1,0 +1,6 @@
+ERROR tests/unit/test_claim_state_machine.py
+ERROR tests/unit/test_bill_rules.py
+ERROR tests/unit/test_settlement_calculator.py
+ERROR tests/architecture/test_settled_cases_immutable.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!
+1 warning, 4 errors in 0.82s

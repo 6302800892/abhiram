@@ -1,0 +1,46 @@
+{
+  "group": "B",
+  "sprint": 2,
+  "title": "Pre-authorization engine & adjudicator workbench",
+  "stories": ["E2-S1", "E2-S2", "E2-S3", "E2-S4"],
+  "features": ["F012", "F013", "F014", "F015", "F016", "F017", "F018", "F019"],
+  "negotiation": {
+    "proposed_by": "generator",
+    "reviewed_by": "evaluator",
+    "changes_by_evaluator": [
+      "Added api-104 (estimate exactly equal to threshold must auto-approve, AC-05.2 boundary)",
+      "Added api-105 (threshold + 0.01 stays PENDING, AC-05.3)",
+      "Added api-110 (decision on an APPROVED pre-auth -> 409, AC-04.4)",
+      "Required that reason codes are validated against the pre-auth's own rule version (PA-R6)"
+    ],
+    "approved": true
+  },
+  "contract": {
+    "api_checks": [
+      { "id": "api-101", "method": "POST", "path": "/api/preauths", "description": "AC-03.1 manual-review diagnosis (I21.9, SILVER) -> 201 PENDING with PA-SUBMITTED + PA-MANUAL-REVIEW", "expected_status": 201 },
+      { "id": "api-102", "method": "POST", "path": "/api/preauths", "description": "AC-03.3 estimated_cost 0 -> 422", "expected_status": 422 },
+      { "id": "api-103", "method": "POST", "path": "/api/preauths", "description": "AC-05.1 K35.8 40000.00 -> APPROVED 40000.00 PA-AUTO-APPROVED", "expected_status": 201 },
+      { "id": "api-104", "method": "POST", "path": "/api/preauths", "description": "AC-05.2 K35.8 50000.00 (== threshold) -> APPROVED", "expected_status": 201 },
+      { "id": "api-105", "method": "POST", "path": "/api/preauths", "description": "AC-05.3 K35.8 50000.01 -> PENDING", "expected_status": 201 },
+      { "id": "api-106", "method": "POST", "path": "/api/preauths", "description": "AC-05.4 GOLD remaining 40000.00, K35.8 60000.00 -> PARTIALLY_APPROVED 40000.00 PA-AUTO-CAPPED", "expected_status": 201 },
+      { "id": "api-107", "method": "POST", "path": "/api/preauths", "description": "AC-04.2 Z41.1 -> REJECTED by SYSTEM", "expected_status": 201 },
+      { "id": "api-108", "method": "POST", "path": "/api/preauths", "description": "AC-04.1 unknown code -> QUERY_RAISED", "expected_status": 201 },
+      { "id": "api-109", "method": "POST", "path": "/api/preauths/{id}/decisions", "description": "AC-04.7 insurer partial approval 30000.00", "expected_status": 200 },
+      { "id": "api-110", "method": "POST", "path": "/api/preauths/{id}/decisions", "description": "AC-04.4 decision on decided pre-auth -> 409 INVALID_PREAUTH_STATE", "expected_status": 409 },
+      { "id": "api-111", "method": "POST", "path": "/api/preauths/{id}/query-response", "description": "AC-04.3 -> PENDING PA-QUERY-ANSWERED", "expected_status": 200 },
+      { "id": "api-112", "method": "GET", "path": "/api/adjudication/queue", "description": "AD-R1 pending queue oldest first", "expected_status": 200 },
+      { "id": "api-113", "method": "GET", "path": "/api/preauths/{id}", "description": "PA-R8 other hospital -> 404", "expected_status": 404 }
+    ],
+    "playwright_checks": [],
+    "design_checks": {},
+    "performance_checks": [
+      { "endpoint": "/api/preauths", "max_response_time_ms": 500, "method": "POST" }
+    ],
+    "architecture_checks": {
+      "layering": { "required": true, "description": "lint-imports 3 contracts kept" },
+      "append_only": { "required": true, "description": "preauths and preauth_decisions UPDATE/DELETE abort" },
+      "migrations": { "required": true, "description": "0002 added; 0001 unchanged (checksum)" },
+      "phi": { "required": true, "description": "clinical_notes / diagnosis never in logs" }
+    }
+  }
+}

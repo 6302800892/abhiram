@@ -1,0 +1,15 @@
+    test-results\hospital-AC-02-eligibility-eb73f--ELIGIBLE-with-reason-codes-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+    Error Context: test-results\hospital-AC-02-eligibility-eb73f--ELIGIBLE-with-reason-codes-chromium\error-context.md
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\hospital-AC-02-eligibility-eb73f--ELIGIBLE-with-reason-codes-chromium\trace.zip
+    Usage:
+        npx playwright show-trace test-results\hospital-AC-02-eligibility-eb73f--ELIGIBLE-with-reason-codes-chromium\trace.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+Testing stopped early after 3 maximum allowed failures.
+  3 failed
+    [chromium] › e2e\customer.spec.ts:4:1 › AC-01 customer sees sum insured, exclusions and network hospitals 
+    [chromium] › e2e\customer.spec.ts:15:1 › AC-07/AC-09 customer sees the timeline, notifications and settlement breakdown 
+    [chromium] › e2e\hospital.spec.ts:9:1 › AC-02 eligibility lookup shows ELIGIBLE and NOT_ELIGIBLE with reason codes 
+  19 did not run
+  1 error was not a part of any test, see above for details

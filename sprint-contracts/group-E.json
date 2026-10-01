@@ -1,0 +1,52 @@
+{
+  "group": "E",
+  "sprint": 5,
+  "title": "Role-based responsive portal (React + Vite) with Playwright UI validation",
+  "stories": ["E5-S1", "E5-S2", "E5-S3", "E5-S4"],
+  "features": ["F033", "F034", "F035", "F036", "F037", "F038"],
+  "negotiation": {
+    "proposed_by": "generator",
+    "reviewed_by": "evaluator",
+    "changes_by_evaluator": [
+      "Added pw-006 (375px viewport: navigation stacks, no horizontal scroll) — responsiveness is a rubric item",
+      "Required ARIA snapshots (text, OS-independent) as the committed snapshot baseline; pixel screenshots tagged @visual and run locally only",
+      "Every journey seeds its own data through the API so specs are order-independent"
+    ],
+    "approved": true
+  },
+  "contract": {
+    "api_checks": [
+      { "id": "api-401", "method": "GET", "path": "/", "description": "SPA index served by FastAPI", "expected_status": 200 },
+      { "id": "api-402", "method": "GET", "path": "/api/does-not-exist", "description": "unknown API path is JSON 404, not the SPA", "expected_status": 404 }
+    ],
+    "playwright_checks": [
+      { "id": "pw-001", "description": "Login routes each role to its workspace heading", "url": "/",
+        "steps": [
+          { "action": "fill", "selector": "getByLabel('Username')", "value": "cityhosp.desk" },
+          { "action": "fill", "selector": "getByLabel('Password')", "value": "Demo@1234" },
+          { "action": "click", "selector": "getByRole('button', { name: 'Sign in' })" },
+          { "action": "assert_visible", "selector": "getByRole('heading', { name: 'Hospital workspace' })" } ] },
+      { "id": "pw-002", "description": "AC-02/AC-03 hospital checks eligibility then submits a pre-auth and sees its status", "url": "/hospital",
+        "steps": [ { "action": "assert_visible", "selector": "getByText('ELIGIBLE')" }, { "action": "assert_visible", "selector": "getByText('APPROVED')" } ] },
+      { "id": "pw-003", "description": "AC-06 hospital admits, adds procedure, submits final bill (cap error shown above cap), discharges", "url": "/cases/{id}",
+        "steps": [ { "action": "assert_visible", "selector": "getByRole('alert')" } ] },
+      { "id": "pw-004", "description": "AC-01/AC-07/AC-09 customer sees coverage, case timeline and settlement breakdown", "url": "/customer",
+        "steps": [ { "action": "assert_visible", "selector": "getByRole('heading', { name: 'My coverage' })" } ] },
+      { "id": "pw-005", "description": "AC-04/AC-10 adjudicator approves from queue; admin overrides an auto-rejection and sees the audit row", "url": "/insurer",
+        "steps": [ { "action": "assert_visible", "selector": "getByRole('heading', { name: 'Audit log' })" } ] },
+      { "id": "pw-006", "description": "Responsive: at 375x800 the layout is single-column and has no horizontal scroll", "url": "/hospital",
+        "steps": [ { "action": "assert", "selector": "document.documentElement.scrollWidth <= 375" } ] }
+    ],
+    "design_checks": {
+      "visual_hierarchy": { "required": true, "min_score": 6 },
+      "accessibility": { "required": true, "min_score": 5 },
+      "responsiveness": { "required": true, "min_score": 6 },
+      "interaction_feedback": { "required": true, "min_score": 5 }
+    },
+    "performance_checks": [ { "endpoint": "/", "max_response_time_ms": 500, "method": "GET" } ],
+    "architecture_checks": {
+      "ui_layer": { "required": true, "description": "UI talks only to /api via src/api.ts; no business math in the UI (money shown as server strings)" },
+      "snapshots": { "required": true, "description": "frontend/e2e/__snapshots__ committed" }
+    }
+  }
+}

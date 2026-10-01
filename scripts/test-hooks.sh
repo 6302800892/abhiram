@@ -14,6 +14,12 @@ cat > "$T/src/service/good.py" <<'EOF'
 import logging
 logger = logging.getLogger(__name__)
 logger.info("preauth.submitted", extra={"case_id": 1})
+logger.info("case.procedure_added", extra={"case_id": 1})
+EOF
+cat > "$T/src/service/leak2.py" <<'EOF'
+import logging
+logger = logging.getLogger(__name__)
+logger.info("debug", extra={"clinical_notes": notes})
 EOF
 cat > "$T/src/api/routes/r.py" <<'EOF'
 @router.get("/a")
@@ -23,6 +29,15 @@ def a(principal = Depends(require_roles(Role.ADMIN))):
 @router.post("/b")
 def b():
     pass
+EOF
+cat > "$T/src/service/bill_bad.py" <<'EOF'
+def submit_final_bill(conn, amount):
+    bill_repo.append_bill(conn, amount=amount)
+EOF
+cat > "$T/src/api/routes/bill_route.py" <<'EOF'
+@router.post("/x")
+def submit_final_bill(principal: HospitalUser):
+    return case_service.submit_final_bill()
 EOF
 cat > "$T/src/service/s.py" <<'EOF'
 def calculate_settlement(x):
@@ -40,11 +55,16 @@ run() {
 FAILED=0
 run 2 phi-redaction-check "$T/src/service/bad.py"
 run 0 phi-redaction-check "$T/src/service/good.py"
+run 2 phi-redaction-check "$T/src/service/leak2.py"
 run 2 money-float-check "$T/src/service/bad.py"
 run 0 money-float-check "$T/src/service/good.py"
 run 2 role-boundary-check "$T/src/api/routes/r.py"
 run 2 settlement-cap-check "$T/src/service/s.py"
 run 0 settlement-cap-check "$T/src/service/good.py"
+run 2 settlement-cap-check "$T/src/service/bill_bad.py"
+run 0 settlement-cap-check "$T/src/api/routes/bill_route.py"
 run 2 append-only-migration-check "$T/migrations/bad-name.sql"
 run 0 append-only-migration-check "$T/migrations/0001_init.sql"
+echo "-- applied" > "$T/migrations/0002_existing.sql"
+run 2 append-only-migration-check "$T/migrations/0002_existing.sql"
 exit $FAILED
