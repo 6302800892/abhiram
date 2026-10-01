@@ -1,0 +1,66 @@
+{
+  "name": "medicard",
+  "description": "MediCard — Health Cashless Hospitalization & Settlement Platform (BC-AINE-017)",
+  "stack": {
+    "backend": {
+      "language": "python",
+      "version": "3.12",
+      "framework": "fastapi",
+      "package_manager": "poetry",
+      "linter": "ruff",
+      "typechecker": "mypy",
+      "test_runner": "pytest",
+      "architecture_linter": "import-linter"
+    },
+    "frontend": {
+      "language": "typescript",
+      "framework": "react",
+      "bundler": "vite",
+      "package_manager": "npm",
+      "typechecker": "tsc",
+      "test_runner": "playwright"
+    },
+    "database": {
+      "primary": "sqlite",
+      "secondary": null
+    },
+    "deployment": {
+      "method": "local",
+      "services": ["backend", "frontend"]
+    }
+  },
+  "layers": [
+    { "name": "domain", "path": "src/domain", "rank": 1 },
+    { "name": "config", "path": "src/config", "rank": 2 },
+    { "name": "repository", "path": "src/repository", "rank": 3 },
+    { "name": "service", "path": "src/service", "rank": 4 },
+    { "name": "api", "path": "src/api", "rank": 5 },
+    { "name": "ui", "path": "frontend/src", "rank": 6 }
+  ],
+  "evaluation": {
+    "api_base_url": "http://localhost:8000/api",
+    "ui_base_url": "http://localhost:8000",
+    "health_check": "http://localhost:8000/health",
+    "design_score_threshold": 6,
+    "design_max_iterations": 5,
+    "test_corpus_dir": "seed"
+  },
+  "execution": {
+    "default_mode": "lean",
+    "max_self_heal_attempts": 3,
+    "max_auto_iterations": 50,
+    "coverage_threshold": 80,
+    "session_chaining": true,
+    "agent_team_size": "auto",
+    "teammate_model": "sonnet"
+  },
+  "verification": {
+    "mode": "local",
+    "health_check": { "url": "http://localhost:8000/health", "retries": 5, "backoff_seconds": 2 },
+    "local": {
+      "backend_url": "http://localhost:8000",
+      "frontend_url": "http://localhost:8000",
+      "start_commands": ["poetry run medicard"]
+    }
+  }
+}

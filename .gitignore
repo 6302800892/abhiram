@@ -1,0 +1,22 @@
+.env
+.env.local
+.env.production
+node_modules/
+__pycache__/
+*.pyc
+.coverage
+htmlcov/
+dist/
+build/
+.venv/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+playwright-report/
+test-results/
+data/*.db
+data/*.db-*
+# local harness clone (literal "~" folder on Windows)
+/~/
+/_backup_learnlab/
